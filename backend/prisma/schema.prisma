@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  cpf       String   @unique
+  email     String   @unique
+  hashSenha String
+  createdAt DateTime @default(now())
+
+  conta     Conta?
+}
+
+model Conta {
+  id        Int      @id @default(autoincrement())
+  numero    String   @unique
+  saldo     Decimal  @db.Decimal(15, 2)
+  status    StatusDaConta @default(ATIVA)
+  createdAt DateTime @default(now())
+
+  usuarioId Int      @unique
+  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+
+  transacoes Transacao[]
+}
+
+enum StatusDaConta {
+  ATIVA
+  BLOQUEADA
+}
+
+
+model Transacao {
+  id        Int      @id @default(autoincrement())
+  quantia   Decimal  @db.Decimal(15, 2)
+  type      TipoTransacao
+  createdAt DateTime @default(now())
+
+  contaId   Int
+  conta     Conta    @relation(fields: [contaId], references: [id])
+}
+
+enum TipoTransacao {
+  DEPOSITO
+  SAQUE
+  TRANSFERENCIA
+}
