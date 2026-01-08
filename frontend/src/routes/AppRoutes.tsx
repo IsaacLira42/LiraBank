@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router";
 import Home from "../pages/Home";
-import AuthPage from "../pages/Autenticacao";
+import AuthPage from "../pages/AuthPage";
 
 const AppRoutes = () => {
   return (
