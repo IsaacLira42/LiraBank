@@ -1,0 +1,13 @@
+@baseUrl = http://localhost:3000/api
+
+// Cadastrar usuarios
+POST {{baseUrl}}/auth/register HTTP/1.1
+Content-Type: application/json
+
+{
+    "nome": "Usuario Teste",
+    "cpf": "12345678900",
+    "email": "usuario.teste@example.com",
+    "senha": "senhaSegura123",
+    "senhaConfirmacao": "senhaSegura123"
+}
