@@ -9,10 +9,9 @@ const usuarioController: UsuarioController = new UsuarioController(
   usuarioService
 );
 
-const UsuarioRouter = Router();
+const AuthRouter = Router();
 
-UsuarioRouter.get("/", usuarioController.findAll);
-UsuarioRouter.get("/:id", usuarioController.findById);
-UsuarioRouter.put("/:id", usuarioController.update);
+// Rota para registro de novos usuários
+AuthRouter.post("/register", usuarioController.create);
 
-export default UsuarioRouter;
+export default AuthRouter;
