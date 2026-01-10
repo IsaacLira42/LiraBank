@@ -1,7 +1,7 @@
-@baseUrl = http://localhost:3000/api
+@baseUrl = http://localhost:3000/api/auth
 
 // Cadastrar usuarios
-POST {{baseUrl}}/auth/register HTTP/1.1
+POST {{baseUrl}}/register HTTP/1.1
 Content-Type: application/json
 
 {
@@ -10,4 +10,13 @@ Content-Type: application/json
     "email": "usuario.teste@example.com",
     "senha": "senhaSegura123",
     "senhaConfirmacao": "senhaSegura123"
+}
+
+// Logar com email e senha
+POST {{baseUrl}}/login HTTP/1.1
+Content-Type: application/json
+
+{
+    "email": "usuario.teste@example.com",
+    "senha": "senhaSegura123"
 }

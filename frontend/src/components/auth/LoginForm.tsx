@@ -13,6 +13,10 @@ export interface payloadLogin {
   senha: string;
 }
 
+interface loginResult {
+  token: string;
+}
+
 export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
   const [formData, setFormData] = useState({
     email: "",
@@ -36,21 +40,22 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       senha: formData.senha,
     };
 
-    const response = await fetch("/auth/login", {
+    const response = await fetch("http://localhost:3000/api/auth/login", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const result = await response.json();
+    const result: loginResult = await response.json();
 
     if (!response.ok) {
-      alert(`Erro: ${result.message || "Falha no login"}`);
+      alert("Erro: Falha no login");
       return;
     }
 
-    alert(result.message);
+    localStorage.setItem("token", result.token);
+
     window.location.reload();
   };
 
