@@ -1,7 +1,11 @@
 import { NavLink } from "react-router";
 import { AuthButtons } from "./auth/AuthButtons";
+import { useAuth } from "@/hooks/useAuth";
+import { DropDownUser } from "./DropDownUser";
 
 export const Navbar = () => {
+  const { user, isAuthenticated } = useAuth();
+
   return (
     <div className="mx-4 md:mx-8 lg:mx-16 my-4 flex flex-row items-center justify-between">
       <NavLink to="/" className="flex flex-row items-center gap-2">
@@ -43,7 +47,11 @@ export const Navbar = () => {
       </nav>
 
       <div className="flex flex-row gap-3">
-        <AuthButtons />
+        {!isAuthenticated ? (
+          <AuthButtons />
+        ) : (
+          user && <DropDownUser nome={user.nome} />
+        )}
       </div>
     </div>
   );
