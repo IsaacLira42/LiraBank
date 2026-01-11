@@ -1,4 +1,4 @@
-import id from "zod/v4/locales/id.js";
+import { env } from "node:process";
 import { UsuarioRepository } from "../../repositories/Usuario.Repository";
 import { InputLoginDTO } from "../../types/auth/Login.dto";
 import { AppError } from "../../utils/AppError";
@@ -16,25 +16,17 @@ export class AuthService {
     const { email, senha } = data;
 
     const usuario = await this.usuarioRepository.validarEmail(email);
-
-    if (!usuario) {
-      throw new AppError("Email ou senha inválidos", 401);
-    }
+    if (!usuario) throw new AppError("Email ou senha inválidos", 401);
 
     const senhaVerificada = await bcrypt.compare(senha, usuario.senha);
-
-    if (!senhaVerificada) {
-      throw new AppError("Email ou senha inválidos", 401);
-    }
+    if (!senhaVerificada) throw new AppError("Email ou senha inválidos", 401);
 
     const secret = process.env.JWT_SECRET;
-    if (!secret) {
-      throw new AppError("JWT Secret não configurada", 500);
-    }
+    if (!secret) throw new AppError("JWT Secret não configurada", 500);
 
     const token = jwt.sign(
       {
-        sub: usuario.id,
+        id: usuario.id,
       },
       secret,
       {

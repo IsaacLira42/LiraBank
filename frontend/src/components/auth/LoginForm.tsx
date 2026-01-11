@@ -55,6 +55,7 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     }
 
     localStorage.setItem("token", result.token);
+    console.log(result.token);
 
     window.location.reload();
   };
