@@ -4,12 +4,15 @@ import {
   UsuarioCreateInputSchema,
   UsuarioUpdateSchema,
 } from "../types/usuario/Usuario.Schema";
+import { ContaService } from "../services/Conta.Service";
 
 export class UsuarioController {
   private usuarioService: UsuarioService;
+  private contaService: ContaService;
 
-  constructor(usuarioService: UsuarioService) {
+  constructor(usuarioService: UsuarioService, contaService: ContaService) {
     this.usuarioService = usuarioService;
+    this.contaService = contaService;
   }
 
   findAll = async (req: Request, res: Response, next: NextFunction) => {
@@ -51,6 +54,9 @@ export class UsuarioController {
       const data = UsuarioCreateInputSchema.parse(req.body);
 
       const usuario = await this.usuarioService.create(data);
+
+      // Criar uma conta associada ao novo usuário
+      await this.contaService.create(usuario.id);
 
       return res.status(201).json(usuario);
     } catch (error) {

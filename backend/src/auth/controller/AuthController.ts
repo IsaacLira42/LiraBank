@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../services/AuthServices";
 import { inputLoginSchema } from "../../types/auth/Login.Schema";
-import { UsuarioController } from "../../controllers/Usuario.Controller";
 import { UsuarioService } from "../../services/Usuario.Service";
 import { AppError } from "../../utils/AppError";
 
@@ -20,7 +19,7 @@ export class AuthController {
 
       const token = await this.authService.login(dataLogin);
 
-      return res.status(201).json(token);
+      return res.status(200).json(token);
     } catch (error) {
       next(error);
     }
