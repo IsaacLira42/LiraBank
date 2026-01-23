@@ -6,4 +6,4 @@ GET {{baseUrl}}/usuarios
 
 
 ### FindById
-GET {{baseUrl}}/usuarios?id=5
+GET {{baseUrl}}/usuarios/5

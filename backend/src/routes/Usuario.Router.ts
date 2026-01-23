@@ -1,17 +1,11 @@
 import { Router } from "express";
-import { UsuarioRepository } from "../repositories/Usuario.Repository";
-import { UsuarioService } from "../services/Usuario.Service";
-import { UsuarioController } from "../controllers/Usuario.Controller";
-
-const usuarioRepository: UsuarioRepository = new UsuarioRepository();
-const usuarioService: UsuarioService = new UsuarioService(usuarioRepository);
-const usuarioController: UsuarioController = new UsuarioController(usuarioService);
+import { AuthMiddleware } from "../auth/middlewares/AuthMiddleware";
+import { container } from "../container";
 
 const UsuarioRouter = Router();
+const { usuarioController } = container;
 
-UsuarioRouter.get("/", usuarioController.findAll);
-UsuarioRouter.get("/:id", usuarioController.findById);
-UsuarioRouter.put("/:id", usuarioController.update)
-UsuarioRouter.post("/", usuarioController.create)
+UsuarioRouter.get("/:id", AuthMiddleware, usuarioController.findById);
+UsuarioRouter.put("/:id", AuthMiddleware, usuarioController.update);
 
 export default UsuarioRouter;

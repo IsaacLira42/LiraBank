@@ -1,13 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { Link, NavLink } from "react-router";
+import { NavLink } from "react-router";
+import { AuthButtons } from "./auth/AuthButtons";
+import { useAuth } from "@/hooks/useAuth";
+import { DropDownUser } from "./DropDownUser";
 
 export const Navbar = () => {
+  const { user, isAuthenticated } = useAuth();
+
   return (
     <div className="mx-4 md:mx-8 lg:mx-16 my-4 flex flex-row items-center justify-between">
       <NavLink to="/" className="flex flex-row items-center gap-2">
         <img
           className="w-10 object-contain"
-          src="/logo_verde_limao_lirabank 3.png"
+          src="/logo_verde_limao_lirabank.png"
           alt="logo do banco bamerindus"
         />
         <h1 className="text-2xl text-limao font-bold">LiraBank</h1>
@@ -43,16 +47,11 @@ export const Navbar = () => {
       </nav>
 
       <div className="flex flex-row gap-3">
-        <Button className="cursor-pointer" variant="outline" asChild>
-          <Link to="/auth/login">Login</Link>
-        </Button>
-
-        <Button
-          className="cursor-pointer bg-limao hover:bg-lime-500 text-verde-floresta"
-          asChild
-        >
-          <Link to="/auth/cadastro">Cadastrar-se</Link>
-        </Button>
+        {!isAuthenticated ? (
+          <AuthButtons />
+        ) : (
+          user && <DropDownUser nome={user.nome} />
+        )}
       </div>
     </div>
   );

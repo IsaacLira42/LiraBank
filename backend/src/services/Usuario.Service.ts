@@ -1,63 +1,85 @@
-import { UsuarioRepository } from "../repositories/Usuario.Repository"
-import { UsuarioResponseDto, UsuarioCreateInputDto, UsuarioCreateDto, UsuarioUpdateDto } from "../types/usuario/Usuario.Dto";
+import { UsuarioRepository } from "../repositories/Usuario.Repository";
+import {
+  UsuarioResponseDto,
+  UsuarioCreateInputDto,
+  UsuarioCreateDto,
+  UsuarioUpdateDto,
+} from "../types/usuario/Usuario.Dto";
 import bcrypt from "bcrypt";
 import { AppError } from "../utils/AppError";
 import { Usuario } from "../generated/prisma/client";
 
 export class UsuarioService {
+  private usuarioRepository: UsuarioRepository;
 
-    private usuarioRepository: UsuarioRepository;
+  constructor(usuarioRepository: UsuarioRepository) {
+    this.usuarioRepository = usuarioRepository;
+  }
 
-    constructor(usuarioRepository: UsuarioRepository) {
-        this.usuarioRepository = usuarioRepository;
+  async findAll(): Promise<UsuarioResponseDto[]> {
+    const usuarios = await this.usuarioRepository.findAll();
+    return this.mapUsuarios(usuarios);
+  }
+
+  async findById(id: number): Promise<UsuarioResponseDto | null> {
+    const usuario = await this.usuarioRepository.findById(id);
+    if (!usuario) return null;
+
+    return this.mapUsuario(usuario);
+  }
+
+  async update(
+    id: number,
+    data: UsuarioUpdateDto
+  ): Promise<UsuarioResponseDto | null> {
+    const usuarioAtualizado = await this.usuarioRepository.update(id, data);
+    if (!usuarioAtualizado) return null;
+
+    return this.mapUsuario(usuarioAtualizado);
+  }
+
+  async create(data: UsuarioCreateInputDto): Promise<UsuarioResponseDto> {
+    const usuarioCPF = await this.usuarioRepository.validarCpf(data.cpf);
+    if (usuarioCPF) {
+      throw new AppError("Já existe um usuário com esse CPF", 400);
     }
 
-    async findAll(): Promise<UsuarioResponseDto[]> {       
-        return await this.usuarioRepository.findAll();
+    const usuarioEmail = await this.usuarioRepository.validarEmail(data.email);
+    if (usuarioEmail) {
+      throw new AppError("Já existe um usuário com esse email", 400);
     }
 
-    async findById(id: number): Promise<UsuarioResponseDto | null> {
-        return await this.usuarioRepository.findById(id);
+    const { senha, senhaConfirmacao, ...resto } = data;
+
+    if (senha !== senhaConfirmacao) {
+      throw new AppError(
+        "A senha e a confirmação de senha são diferentes",
+        400
+      );
     }
 
-    async update(id: number, data: UsuarioUpdateDto): Promise<UsuarioResponseDto | null> {
-        const usuarioAtualizado = this.prepararResponseUsuario(await this.usuarioRepository.update(id, data));
-        return usuarioAtualizado;
-    }
+    const hashedSenha = await bcrypt.hash(senha, 12);
 
-    async create(data: UsuarioCreateInputDto): Promise<UsuarioResponseDto | null> {
-        // Verificar se o cpf ja foi cadastrado
-        let usuarioCPF = await this.usuarioRepository.validarCpf(data.cpf);
-        if (usuarioCPF) {
-            throw new AppError("Ja existe um usurio com esse cpf", 400);
-        }
+    const usuarioData: UsuarioCreateDto = {
+      ...resto,
+      senha: hashedSenha,
+    };
 
-        // Verificar se o email ja foi cadastrado
-        const usuarioEmail = await this.usuarioRepository.validarEmail(data.email);
-        if (usuarioEmail) {
-            throw new AppError("Ja existe um usuario com esse email", 400);
-        }
+    const usuarioCriado = await this.usuarioRepository.create(usuarioData);
 
-        const {senha, senhaConfirmacao, ...resto} = data;
+    return this.mapUsuario(usuarioCriado);
+  }
 
-        if (senha !== senhaConfirmacao) {
-            throw new AppError("A senha e a senha de confirmação são diferentes");
-        }
+  // ========================
+  // MAPPERS (PRIVADOS)
+  // ========================
 
-        const hashedSenha = await bcrypt.hash(senha, 12);
+  private mapUsuario(usuario: Usuario): UsuarioResponseDto {
+    const { senha, ...resto } = usuario;
+    return resto;
+  }
 
-        const usuarioData: UsuarioCreateDto = { ...resto, senha: hashedSenha};
-
-        const usuarioCriado = this.prepararResponseUsuario(await this.usuarioRepository.create(usuarioData));
-        
-        return usuarioCriado;
-    }
-
-    // Outros metodos
-    prepararResponseUsuario = (data: Usuario | null): UsuarioResponseDto | null => {
-        if (!data) return null;
-
-        const {senha, ...resto} = data;
-        return resto;
-    }
+  private mapUsuarios(usuarios: Usuario[]): UsuarioResponseDto[] {
+    return usuarios.map((usuario) => this.mapUsuario(usuario));
+  }
 }
