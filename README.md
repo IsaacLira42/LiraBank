@@ -117,6 +117,9 @@ npm run dev
 
 ## 👤 Autor
 
-**Isaac Lira**
+**Isaac Lira**  
+Desenvolvedor Full Stack | TypeScript Enthusiast
 
-- [LinkedIn](https://www.linkedin.com/in/isaaclira42/) | [Github](https://github.com/IsaacLira42)
+[![GitHub](https://skillicons.dev/icons?i=github)](https://github.com/IsaacLira42)
+[![LinkedIn](https://skillicons.dev/icons?i=linkedin)](https://linkedin.com/in/isaaclira42)
+[![Gmail](https://skillicons.dev/icons?i=gmail)](mailto:isaaclira422@gmail.com)
