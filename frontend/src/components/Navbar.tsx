@@ -2,9 +2,12 @@ import { NavLink } from "react-router";
 import { AuthButtons } from "./auth/AuthButtons";
 import { useAuth } from "@/hooks/useAuth";
 import { DropDownUser } from "./DropDownUser";
+import { useState } from "react";
+import { ContaModal } from "@/components/conta/ContaModal";
 
 export const Navbar = () => {
   const { user, isAuthenticated } = useAuth();
+  const [isContaOpen, setIsContaOpen] = useState(false);
 
   return (
     <div className="mx-4 md:mx-8 lg:mx-16 my-4 flex flex-row items-center justify-between">
@@ -14,14 +17,14 @@ export const Navbar = () => {
           src="/logo_verde_limao_lirabank.png"
           alt="logo do banco bamerindus"
         />
-        <h1 className="text-2xl text-limao font-bold">LiraBank</h1>
+        <h1 className="text-2xl text-[var(--color-limao)] font-bold">LiraBank</h1>
       </NavLink>
 
       <nav className="flex gap-8 items-center">
         <NavLink
           to="/"
           className={({ isActive }) =>
-            isActive ? "font-bold text-verde-floresta" : "text-verde-floresta"
+            isActive ? "font-bold text-[var(--color-verde-floresta)]" : "text-[var(--color-verde-floresta)]"
           }
         >
           Home
@@ -30,7 +33,7 @@ export const Navbar = () => {
         <NavLink
           to="/sobre"
           className={({ isActive }) =>
-            isActive ? "font-bold text-verde-floresta" : "text-verde-floresta"
+            isActive ? "font-bold text-[var(--color-verde-floresta)]" : "text-[var(--color-verde-floresta)]"
           }
         >
           Sobre nós
@@ -39,7 +42,7 @@ export const Navbar = () => {
         <NavLink
           to="/contato"
           className={({ isActive }) =>
-            isActive ? "font-bold text-verde-floresta" : "text-verde-floresta"
+            isActive ? "font-bold text-[var(--color-verde-floresta)]" : "text-[var(--color-verde-floresta)]"
           }
         >
           Contato
@@ -50,7 +53,16 @@ export const Navbar = () => {
         {!isAuthenticated ? (
           <AuthButtons />
         ) : (
-          user && <DropDownUser nome={user.nome} email={user.email} />
+          user && (
+            <>
+              <DropDownUser
+                nome={user.nome}
+                email={user.email}
+                onOpenConta={() => setIsContaOpen(true)}
+              />
+              <ContaModal open={isContaOpen} onOpenChange={setIsContaOpen} />
+            </>
+          )
         )}
       </div>
     </div>
