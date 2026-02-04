@@ -33,7 +33,7 @@ export class AuthController {
 
       if (!usuario) throw new AppError("Usuario Inexistente", 400);
 
-      const { cpf, email, ...rest } = usuario;
+      const { cpf, ...rest } = usuario;
 
       return res.status(200).json(rest);
     } catch (error) {

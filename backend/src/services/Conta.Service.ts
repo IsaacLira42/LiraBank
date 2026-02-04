@@ -44,4 +44,18 @@ export class ContaService {
       500
     );
   }
+
+  async getByUsuarioId(usuarioId: number) {
+    const conta = await this.contaRepository.findByIdUser(usuarioId);
+    if (!conta) throw new AppError("Conta não encontrada.", 404);
+    return conta;
+  }
+
+  async updateStatusByUsuarioId(
+    usuarioId: number,
+    status: "ATIVA" | "BLOQUEADA"
+  ) {
+    const conta = await this.getByUsuarioId(usuarioId);
+    return this.contaRepository.updateStatus(conta.id, status);
+  }
 }

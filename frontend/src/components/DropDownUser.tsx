@@ -4,8 +4,22 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useNavigate } from "react-router";
 
-export const DropDownUser = ({ nome }: { nome: string }) => {
+export const DropDownUser = ({
+  nome,
+  email,
+}: {
+  nome: string;
+  email: string;
+}) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.reload();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -14,8 +28,11 @@ export const DropDownUser = ({ nome }: { nome: string }) => {
         </p>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-30">
-        <DropdownMenuItem>Perfil</DropdownMenuItem>
-        <DropdownMenuItem>Logout</DropdownMenuItem>
+        <DropdownMenuItem disabled>{email}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate("/dashboard")}>
+          Conta
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

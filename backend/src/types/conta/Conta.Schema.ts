@@ -7,4 +7,8 @@ const ContaCreateSchema = z.object({
   usuarioId: z.number().positive(),
 });
 
-export { ContaCreateSchema };
+const ContaUpdateStatusSchema = z.object({
+  status: z.enum(["ATIVA", "BLOQUEADA"]),
+});
+
+export { ContaCreateSchema, ContaUpdateStatusSchema };

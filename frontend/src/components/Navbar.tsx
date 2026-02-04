@@ -50,7 +50,7 @@ export const Navbar = () => {
         {!isAuthenticated ? (
           <AuthButtons />
         ) : (
-          user && <DropDownUser nome={user.nome} />
+          user && <DropDownUser nome={user.nome} email={user.email} />
         )}
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { ContaService } from "../services/Conta.Service";
-import { ContaCreateInputSchema } from "../types/conta/Conta.Schema";
+import { ContaUpdateStatusSchema } from "../types/conta/Conta.Schema";
 
 export class ContaController {
   private contaService: ContaService;
@@ -9,15 +9,25 @@ export class ContaController {
     this.contaService = contaService;
   }
 
-  create = async (req: Request, res: Response, next: NextFunction) => {
+  me = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const contaData = ContaCreateInputSchema.parse(req.body);
-
       const usuarioId = Number(req.user?.id);
+      const conta = await this.contaService.getByUsuarioId(usuarioId);
+      return res.status(200).json(conta);
+    } catch (error) {
+      next(error);
+    }
+  };
 
-      const newConta = await this.contaService.create(usuarioId, contaData);
-
-      return res.status(201).json(newConta);
+  updateStatusMe = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const usuarioId = Number(req.user?.id);
+      const data = ContaUpdateStatusSchema.parse(req.body);
+      const conta = await this.contaService.updateStatusByUsuarioId(
+        usuarioId,
+        data.status
+      );
+      return res.status(200).json(conta);
     } catch (error) {
       next(error);
     }

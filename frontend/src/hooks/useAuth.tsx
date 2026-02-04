@@ -5,6 +5,7 @@ type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 type User = {
   id: number;
   nome: string;
+  email: string;
 };
 
 export function useAuth() {
@@ -14,8 +15,6 @@ export function useAuth() {
   useEffect(() => {
     async function validate() {
       const token = localStorage.getItem("token");
-
-      console.log(`Pegou o token: ${token}`);
 
       if (!token) {
         setStatus("unauthenticated");
@@ -27,13 +26,9 @@ export function useAuth() {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("Response:" + res.json);
-
         if (!res.ok) throw new Error();
 
         const data: User = await res.json();
-
-        console.log("data: " + data);
 
         setUser(data);
         setStatus("authenticated");
