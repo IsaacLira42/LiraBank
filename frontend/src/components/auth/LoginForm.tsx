@@ -3,9 +3,11 @@ import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
 import { useState, type FormEvent } from "react";
 import { Button } from "../ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
+  onSuccess?: () => void;
 }
 
 export interface payloadLogin {
@@ -17,7 +19,8 @@ interface loginResult {
   token: string;
 }
 
-export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
+export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
@@ -54,10 +57,8 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       return;
     }
 
-    localStorage.setItem("token", result.token);
-    console.log(result.token);
-
-    window.location.reload();
+    await login(result.token);
+    onSuccess?.();
   };
 
   return (

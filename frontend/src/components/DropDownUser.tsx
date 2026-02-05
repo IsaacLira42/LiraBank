@@ -4,6 +4,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/hooks/useAuth";
 
 export const DropDownUser = ({
   nome,
@@ -14,10 +15,7 @@ export const DropDownUser = ({
   email: string;
   onOpenConta: () => void;
 }) => {
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    window.location.reload();
-  };
+  const { logout } = useAuth();
 
   return (
     <DropdownMenu>
@@ -36,7 +34,7 @@ export const DropDownUser = ({
         </DropdownMenuItem>
         <DropdownMenuItem
           className="text-[var(--color-verde-floresta)]"
-          onClick={handleLogout}
+          onClick={logout}
         >
           Logout
         </DropdownMenuItem>

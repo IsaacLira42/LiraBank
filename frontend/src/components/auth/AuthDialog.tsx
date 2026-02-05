@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AuthDialogProps {
   children: ReactNode;
@@ -16,12 +17,20 @@ interface AuthDialogProps {
 
 export const AuthDialog = ({ children, initialMode }: AuthDialogProps) => {
   const [mode, setMode] = useState<"login" | "register">(initialMode);
+  const [open, setOpen] = useState(false);
+  const { isAuthenticated } = useAuth();
 
   const switchToRegister = () => setMode("register");
   const switchToLogin = () => setMode("login");
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      setOpen(false);
+    }
+  }, [isAuthenticated]);
+
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
         onInteractOutside={(e) => e.preventDefault()}
@@ -63,9 +72,15 @@ export const AuthDialog = ({ children, initialMode }: AuthDialogProps) => {
             </DialogHeader>
 
             {mode === "login" ? (
-              <LoginForm onSwitchToRegister={switchToRegister} />
+              <LoginForm
+                onSwitchToRegister={switchToRegister}
+                onSuccess={() => setOpen(false)}
+              />
             ) : (
-              <RegisterForm onSwitchToLogin={switchToLogin} />
+              <RegisterForm
+                onSwitchToLogin={switchToLogin}
+                onSuccess={() => setOpen(false)}
+              />
             )}
           </div>
         </div>

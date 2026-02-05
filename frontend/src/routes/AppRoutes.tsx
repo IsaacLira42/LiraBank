@@ -1,12 +1,28 @@
 import { Navigate, Route, Routes } from "react-router";
 import Home from "../pages/Home";
 import Dashboard from "../pages/Dashboard";
+import { ProtectedRoute } from "./ProtectedRoute";
+import { PublicOnlyRoute } from "./PublicOnlyRoute";
 
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      <Route
+        path="/"
+        element={
+          <PublicOnlyRoute redirectTo="/dashboard">
+            <Home />
+          </PublicOnlyRoute>
+        }
+      />
+      <Route
+        path="/dashboard"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
       {/* <Route path="/sobre" element={<Sobre />} />
       <Route path="/contato" element={<Contato />} /> */}
 

@@ -6,9 +6,10 @@ import { Button } from "../ui/button";
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
+  onSuccess?: () => void;
 }
 
-export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
+export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) => {
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
@@ -55,7 +56,8 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
     }
 
     alert(result.message);
-    window.location.reload();
+    onSuccess?.();
+    onSwitchToLogin();
   };
 
   return (
