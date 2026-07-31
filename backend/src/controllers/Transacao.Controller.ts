@@ -26,8 +26,7 @@ export class TransacaoController {
 
       const transacao = await this.transacaoService.createByUsuario(
         usuarioId,
-        data.quantia,
-        data.type
+        data
       );
 
       return res.status(201).json(transacao);

@@ -32,4 +32,14 @@ export class ContaController {
       next(error);
     }
   };
+
+  getSaldoMe = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const usuarioId = Number(req.user?.id);
+      const conta = await this.contaService.getSaldoByUsuarioId(usuarioId);
+      return res.status(200).json({ saldo: conta.saldo });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

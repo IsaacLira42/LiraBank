@@ -65,4 +65,12 @@ export class ContaService {
     const conta = await this.getByUsuarioId(usuarioId);
     return this.contaRepository.updateStatus(conta.id, status);
   }
+
+  async getSaldoByUsuarioId(usuarioId: number) {
+    const conta = await this.getByUsuarioId(usuarioId);
+    if (conta.status !== "ATIVA") {
+      throw new AppError("Apenas contas ativas podem consultar o saldo.", 400);
+    }
+    return conta;
+  }
 }
