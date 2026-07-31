@@ -28,6 +28,29 @@ export class UsuarioService {
     return this.mapUsuario(usuario);
   }
 
+  async getProfile(id: number) {
+    const usuario = await this.usuarioRepository.findByIdWithConta(id);
+    if (!usuario) throw new AppError("Usuário não encontrado.", 404);
+
+    return {
+      id: usuario.id,
+      nome: usuario.nome,
+      email: usuario.email,
+      cpf: usuario.cpf,
+      createdAt: usuario.createdAt,
+      conta: usuario.conta
+        ? {
+            id: usuario.conta.id,
+            agencia: usuario.conta.agencia,
+            numero: usuario.conta.numero,
+            saldo: usuario.conta.saldo,
+            status: usuario.conta.status,
+            createdAt: usuario.conta.createdAt,
+          }
+        : null,
+    };
+  }
+
   async update(
     id: number,
     data: UsuarioUpdateDto

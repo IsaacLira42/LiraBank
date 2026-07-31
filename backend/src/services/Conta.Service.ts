@@ -1,4 +1,4 @@
-import { randomBytes } from "crypto";
+import { randomInt } from "crypto";
 import { ContaRepository } from "../repositories/Conta.Repository";
 import { AppError } from "../utils/AppError";
 
@@ -7,6 +7,12 @@ export class ContaService {
 
   constructor(contaRepository: ContaRepository) {
     this.contaRepository = contaRepository;
+  }
+
+  gerarNumeroConta(): string {
+    const corpo = randomInt(10000, 99999).toString();
+    const digito = randomInt(0, 9).toString();
+    return `${corpo}-${digito}`;
   }
 
   async create(usuarioId: number) {
@@ -18,21 +24,22 @@ export class ContaService {
     if (conta) throw new AppError("Usuário já possui uma conta.", 400);
 
     while (tentativas < maxTentativas) {
-      // Gera número aleatório
-      const numero = randomBytes(10).toString("hex").toUpperCase();
+      // Gera número de conta no formato de banco digital (ex: 12345-6)
+      const numero = this.gerarNumeroConta();
 
       const contaExistente = await this.contaRepository.findByNumero(numero);
 
       // Se não existir, cria a conta
       if (!contaExistente) {
-        const conta = {
+        const novaConta = {
+          agencia: "0001",
           numero,
           usuarioId,
           status: "ATIVA" as const,
           saldo: 0,
         };
 
-        return await this.contaRepository.create(conta);
+        return await this.contaRepository.create(novaConta);
       }
 
       tentativas++;

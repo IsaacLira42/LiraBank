@@ -29,13 +29,13 @@ export class AuthController {
     try {
       const id = Number(req.user?.id);
 
-      const usuario = await this.usuarioService.findById(id);
+      if (!id || Number.isNaN(id)) {
+        throw new AppError("ID de usuário inválido", 400);
+      }
 
-      if (!usuario) throw new AppError("Usuario Inexistente", 400);
+      const profile = await this.usuarioService.getProfile(id);
 
-      const { cpf, ...rest } = usuario;
-
-      return res.status(200).json(rest);
+      return res.status(200).json(profile);
     } catch (error) {
       next(error);
     }

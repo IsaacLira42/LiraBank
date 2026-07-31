@@ -1,10 +1,10 @@
 import * as z from "zod";
 
-export const registerSchema = z
+export const RegisterSchema = z
   .object({
     nome: z.string().min(3, "O nome deve ter no mínimo 3 caracteres").max(70),
     cpf: z.string().length(11, "O CPF deve ter 11 caracteres"),
-    email: z.email("Email inválido").min(1, "O email é obrigatório"),
+    email: z.string().email("Email inválido").min(1, "O email é obrigatório"),
     senha: z.string().min(8, "A senha deve ter no mínimo 8 caracteres").max(30),
     senhaConfirmacao: z
       .string()
@@ -16,4 +16,7 @@ export const registerSchema = z
     path: ["senhaConfirmacao"],
   });
 
-export type RegisterInput = z.infer<typeof registerSchema>;
+export const registerSchema = RegisterSchema;
+
+export type RegisterInput = z.infer<typeof RegisterSchema>;
+

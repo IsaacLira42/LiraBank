@@ -4,23 +4,19 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { useState, type FormEvent } from "react";
 import { Button } from "../ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useLoginMutation } from "@/hooks/useAuthQueries";
+import { loginSchema } from "@/types/LoginSchema";
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
   onSuccess?: () => void;
 }
 
-export interface payloadLogin {
-  email: string;
-  senha: string;
-}
-
-interface loginResult {
-  token: string;
-}
-
 export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => {
   const { login } = useAuth();
+  const loginMutation = useLoginMutation();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     email: "",
     senha: "",
@@ -37,40 +33,41 @@ export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => 
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
-    const payload: payloadLogin = {
-      email: formData.email,
-      senha: formData.senha,
-    };
-
-    const response = await fetch("http://localhost:3000/api/auth/login", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const result: loginResult = await response.json();
-
-    if (!response.ok) {
-      alert("Erro: Falha no login");
+    const validation = loginSchema.safeParse(formData);
+    if (!validation.success) {
+      setErrorMessage(validation.error.issues[0]?.message || "Dados inválidos");
       return;
     }
 
-    await login(result.token);
-    onSuccess?.();
+    try {
+      const result = await loginMutation.mutateAsync(validation.data);
+      await login(result.token);
+      onSuccess?.();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Falha ao realizar login";
+      setErrorMessage(msg);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mt-8 mb-4 grid gap-4">
+      {errorMessage && (
+        <div className="p-2 mb-2 text-sm text-red-600 bg-red-50 rounded-md border border-red-200">
+          {errorMessage}
+        </div>
+      )}
+      <div className="mt-4 mb-4 grid gap-4">
         <div className="grid gap-3">
           <Label htmlFor="email">Email</Label>
           <Input
             className="rounded-2xl"
             id="email"
             name="email"
+            type="email"
             placeholder="Digite o seu email"
+            value={formData.email}
             required
             onChange={handleChange}
           />
@@ -83,6 +80,7 @@ export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => 
             id="senha"
             name="senha"
             placeholder="Digite a sua senha"
+            value={formData.senha}
             required
             onChange={handleChange}
           />
@@ -90,15 +88,15 @@ export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => 
       </div>
 
       <DialogFooter>
-        <Button type="submit" className="w-full">
-          Entrar
+        <Button type="submit" disabled={loginMutation.isPending} className="w-full">
+          {loginMutation.isPending ? "Entrando..." : "Entrar"}
         </Button>
       </DialogFooter>
 
       <hr className="my-7" />
 
       <p>
-        não possue conta?{" "}
+        não possui conta?{" "}
         <span
           className="text-limao cursor-pointer underline"
           onClick={onSwitchToRegister}
@@ -109,3 +107,4 @@ export const LoginForm = ({ onSwitchToRegister, onSuccess }: LoginFormProps) => 
     </form>
   );
 };
+

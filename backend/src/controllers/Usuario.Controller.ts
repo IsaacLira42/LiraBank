@@ -27,7 +27,7 @@ export class UsuarioController {
 
   findById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id: number = Number(req.params);
+      const id: number = Number(req.params.id);
       const usuario = await this.usuarioService.findById(id);
 
       return res.status(200).json(usuario);
@@ -38,7 +38,7 @@ export class UsuarioController {
 
   update = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const id = Number(req.params);
+      const id: number = Number(req.params.id);
       const data = UsuarioUpdateSchema.parse(req.body);
 
       const usuario = await this.usuarioService.update(id, data);

@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Button } from "../ui/button";
+import { useRegisterMutation } from "@/hooks/useAuthQueries";
+import { registerSchema } from "@/types/RegisterSchema";
 
 interface RegisterFormProps {
   onSwitchToLogin: () => void;
@@ -10,6 +12,9 @@ interface RegisterFormProps {
 }
 
 export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) => {
+  const registerMutation = useRegisterMutation();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const [formData, setFormData] = useState({
     nome: "",
     cpf: "",
@@ -28,41 +33,32 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
 
-    if (formData.senha !== formData.senhaConfirmacao) {
-      alert("As senhas não coincidem.");
+    const validation = registerSchema.safeParse(formData);
+    if (!validation.success) {
+      setErrorMessage(validation.error.issues[0]?.message || "Dados inválidos");
       return;
     }
 
-    const payload = {
-      nome: formData.nome,
-      cpf: formData.cpf,
-      email: formData.email,
-      senha: formData.senha,
-      senhaConfirmacao: formData.senhaConfirmacao,
-    };
-
-    const response = await fetch("http://localhost:3000/api/auth/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      alert(`Erro: ${result.message || "Falha no cadastro"}`);
-      return;
+    try {
+      await registerMutation.mutateAsync(validation.data);
+      onSuccess?.();
+      onSwitchToLogin();
+    } catch (err: any) {
+      const msg = err.response?.data?.message || err.message || "Falha ao realizar cadastro";
+      setErrorMessage(msg);
     }
-
-    alert(result.message);
-    onSuccess?.();
-    onSwitchToLogin();
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="mt-8 mb-4 grid gap-4">
+      {errorMessage && (
+        <div className="p-2 mb-2 text-sm text-red-600 bg-red-50 rounded-md border border-red-200">
+          {errorMessage}
+        </div>
+      )}
+      <div className="mt-4 mb-4 grid gap-4">
         <div className="grid gap-3">
           <Label htmlFor="nome">Nome</Label>
           <Input
@@ -79,7 +75,7 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
           <Input
             id="cpf"
             name="cpf"
-            placeholder="000.000.000-00"
+            placeholder="00000000000 (somente números)"
             value={formData.cpf}
             onChange={handleChange}
           />
@@ -90,6 +86,7 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
           <Input
             id="email"
             name="email"
+            type="email"
             placeholder="seu@email.com"
             value={formData.email}
             onChange={handleChange}
@@ -102,7 +99,7 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
             id="senha"
             name="senha"
             type="password"
-            placeholder="Mínimo 6 caracteres"
+            placeholder="Mínimo 8 caracteres"
             value={formData.senha}
             onChange={handleChange}
           />
@@ -122,8 +119,8 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
       </div>
 
       <DialogFooter className="w-full">
-        <Button type="submit" className="w-full">
-          Criar Conta
+        <Button type="submit" disabled={registerMutation.isPending} className="w-full">
+          {registerMutation.isPending ? "Criando Conta..." : "Criar Conta"}
         </Button>
       </DialogFooter>
 
@@ -141,3 +138,4 @@ export const RegisterForm = ({ onSwitchToLogin, onSuccess }: RegisterFormProps) 
     </form>
   );
 };
+

@@ -12,23 +12,35 @@ model Usuario {
   nome      String
   cpf       String   @unique
   email     String   @unique
-  senha String
+  senha     String
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   conta     Conta?
+
+  @@map("usuarios")
 }
 
 model Conta {
-  id        Int      @id @default(autoincrement())
-  numero    String   @unique
-  saldo     Decimal  @db.Decimal(15, 2)
+  id        Int           @id @default(autoincrement())
+  agencia   String        @default("0001")
+  numero    String        @unique
+  saldo     Decimal       @default(0.00) @db.Decimal(15, 2)
   status    StatusDaConta @default(ATIVA)
-  createdAt DateTime @default(now())
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  usuarioId Int      @unique
-  usuario   Usuario  @relation(fields: [usuarioId], references: [id])
+  usuarioId Int     @unique
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
 
-  transacoes Transacao[]
+  transacoesEnviadas  Transacao[]  @relation("ContaOrigem")
+  transacoesRecebidas Transacao[]  @relation("ContaDestino")
+
+  favorecidosMeus    Favorecido[] @relation("ContaProprietaria")
+  favorecidoEmContas Favorecido[] @relation("ContaFavorecida")
+
+  @@index([numero])
+  @@map("contas")
 }
 
 enum StatusDaConta {
@@ -36,19 +48,42 @@ enum StatusDaConta {
   BLOQUEADA
 }
 
-
 model Transacao {
-  id        Int      @id @default(autoincrement())
-  quantia   Decimal  @db.Decimal(15, 2)
-  type      TipoTransacao
-  createdAt DateTime @default(now())
+  id                Int           @id @default(autoincrement())
+  codigoComprovante String        @unique @default(uuid())
+  quantia           Decimal       @db.Decimal(15, 2)
+  type              TipoTransacao
+  descricao         String?
+  createdAt         DateTime      @default(now())
 
-  contaId   Int
-  conta     Conta    @relation(fields: [contaId], references: [id])
+  contaId        Int
+  conta          Conta  @relation("ContaOrigem", fields: [contaId], references: [id])
+
+  contaDestinoId Int?
+  contaDestino   Conta? @relation("ContaDestino", fields: [contaDestinoId], references: [id])
+
+  @@index([contaId, createdAt])
+  @@index([codigoComprovante])
+  @@map("transacoes")
 }
 
 enum TipoTransacao {
   DEPOSITO
   SAQUE
   TRANSFERENCIA
+}
+
+model Favorecido {
+  id             Int      @id @default(autoincrement())
+  apelido        String?
+  createdAt      DateTime @default(now())
+
+  contaOrigemId  Int
+  contaOrigem    Conta    @relation("ContaProprietaria", fields: [contaOrigemId], references: [id], onDelete: Cascade)
+
+  contaDestinoId Int
+  contaDestino   Conta    @relation("ContaFavorecida", fields: [contaDestinoId], references: [id], onDelete: Cascade)
+
+  @@unique([contaOrigemId, contaDestinoId])
+  @@map("favorecidos")
 }

@@ -8,4 +8,8 @@ export type TransacaoCreateDto = {
   contaId: number;
   quantia: Prisma.Decimal;
   type: "DEPOSITO" | "SAQUE" | "TRANSFERENCIA";
+  descricao?: string | null;
+  contaDestinoId?: number | null;
+  codigoComprovante?: string;
 };
+

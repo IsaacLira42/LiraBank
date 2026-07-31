@@ -1,81 +1,57 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useProfileQuery, type UserProfile } from "../hooks/useAuthQueries";
 
 type AuthStatus = "checking" | "authenticated" | "unauthenticated";
 
-type User = {
-  id: number;
-  nome: string;
-  email: string;
-};
-
 type AuthContextValue = {
   status: AuthStatus;
-  user: User | null;
+  user: UserProfile | null;
   isAuthenticated: boolean;
   isChecking: boolean;
   login: (token: string) => Promise<void>;
   logout: () => void;
-  refreshMe: () => Promise<void>;
+  refreshMe: () => void;
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const API_ME = "http://localhost:3000/api/auth/me";
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<AuthStatus>("checking");
-  const [user, setUser] = useState<User | null>(null);
+  const [hasToken, setHasToken] = useState<boolean>(() => !!localStorage.getItem("token"));
+  const queryClient = useQueryClient();
 
-  const refreshMe = useCallback(async () => {
-    const token = localStorage.getItem("token");
+  const { data: user, isLoading, isError, refetch } = useProfileQuery(hasToken);
 
-    if (!token) {
-      setUser(null);
-      setStatus("unauthenticated");
-      return;
-    }
-
-    setStatus("checking");
-
-    try {
-      const res = await fetch(API_ME, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!res.ok) throw new Error();
-
-      const data: User = await res.json();
-      setUser(data);
-      setStatus("authenticated");
-    } catch {
-      localStorage.removeItem("token");
-      setUser(null);
-      setStatus("unauthenticated");
-    }
-  }, []);
+  const status: AuthStatus = useMemo(() => {
+    if (!hasToken) return "unauthenticated";
+    if (isLoading) return "checking";
+    if (isError || !user) return "unauthenticated";
+    return "authenticated";
+  }, [hasToken, isLoading, isError, user]);
 
   const login = useCallback(
     async (token: string) => {
       localStorage.setItem("token", token);
-      await refreshMe();
+      setHasToken(true);
+      await refetch();
     },
-    [refreshMe]
+    [refetch]
   );
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
-    setUser(null);
-    setStatus("unauthenticated");
-  }, []);
+    setHasToken(false);
+    queryClient.removeQueries({ queryKey: ["auth"] });
+  }, [queryClient]);
 
-  useEffect(() => {
-    refreshMe();
-  }, [refreshMe]);
+  const refreshMe = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       status,
-      user,
+      user: user || null,
       isAuthenticated: status === "authenticated",
       isChecking: status === "checking",
       login,
@@ -95,3 +71,4 @@ export function useAuth() {
   }
   return ctx;
 }
+

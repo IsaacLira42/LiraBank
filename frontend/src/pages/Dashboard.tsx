@@ -11,14 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+import { api } from "@/services/api";
+
 type Transacao = {
   id: number;
   quantia: string | number;
   type: "DEPOSITO" | "SAQUE" | "TRANSFERENCIA";
   createdAt: string;
 };
-
-const API_BASE = "http://localhost:3000/api";
 
 function formatMoney(value: string | number) {
   const n = typeof value === "string" ? Number(value) : value;
@@ -29,7 +29,6 @@ function formatMoney(value: string | number) {
 export default function Dashboard() {
   const { isAuthenticated, isChecking } = useAuth();
 
-  const token = localStorage.getItem("token");
   const [transacoes, setTransacoes] = useState<Transacao[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,61 +36,37 @@ export default function Dashboard() {
   const [deposito, setDeposito] = useState(10);
 
   async function fetchTransacoes() {
-    if (!token) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      const transRes = await fetch(`${API_BASE}/transacoes/me`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (!transRes.ok) throw new Error("Falha ao carregar transações");
-
-      const transData: Transacao[] = await transRes.json();
-      setTransacoes(transData);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao carregar dashboard");
+      const res = await api.get<Transacao[]>("/transacoes/me");
+      setTransacoes(res.data);
+    } catch (e: any) {
+      setError(e.response?.data?.message || e.message || "Erro ao carregar dashboard");
     } finally {
       setLoading(false);
     }
   }
 
   async function criarDeposito() {
-    if (!token) return;
-
     setLoading(true);
     setError(null);
 
     try {
-      const res = await fetch(`${API_BASE}/transacoes/me`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ quantia: Number(deposito), type: "DEPOSITO" }),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        const msg = body?.message ? String(body.message) : "Falha ao criar depósito";
-        throw new Error(msg);
-      }
-
+      await api.post("/transacoes/me", { quantia: Number(deposito), type: "DEPOSITO" });
       await fetchTransacoes();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao criar depósito");
+    } catch (e: any) {
+      setError(e.response?.data?.message || e.message || "Erro ao criar depósito");
       setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       fetchTransacoes();
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   if (isChecking) return null;
   if (!isAuthenticated) return <Navigate to="/" />;

@@ -15,6 +15,13 @@ export class UsuarioRepository {
         });
     }
 
+    async findByIdWithConta(id: number) {
+        return await prisma.usuario.findUnique({
+            where: { id },
+            include: { conta: true },
+        });
+    }
+
     async create(data: UsuarioCreateDto): Promise<Usuario> {
         return await prisma.usuario.create({data});
     }
