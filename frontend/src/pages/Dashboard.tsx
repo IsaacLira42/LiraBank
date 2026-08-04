@@ -45,8 +45,14 @@ export default function Dashboard() {
 
   // React Query Hooks
   const { data: conta, isLoading: loadingConta } = useContaQuery();
-  const { data: saldoData, isLoading: loadingSaldo, error: errorSaldo, refetch: refetchSaldo } = useSaldoQuery();
-  const { data: transacoes = [], isLoading: loadingTransacoes } = useTransactionsQuery();
+  const {
+    data: saldoData,
+    isLoading: loadingSaldo,
+    error: errorSaldo,
+    refetch: refetchSaldo,
+  } = useSaldoQuery();
+  const { data: transacoes = [], isLoading: loadingTransacoes } =
+    useTransactionsQuery();
 
   const depositoMutation = useDepositoMutation();
   const saqueMutation = useSaqueMutation();
@@ -54,7 +60,9 @@ export default function Dashboard() {
 
   // UI States
   const [showBalance, setShowBalance] = useState(true);
-  const [activeTab, setActiveTab] = useState<"deposito" | "saque" | "transferencia">("deposito");
+  const [activeTab, setActiveTab] = useState<
+    "deposito" | "saque" | "transferencia"
+  >("deposito");
 
   // Form States
   const [valorDeposito, setValorDeposito] = useState("");
@@ -99,15 +107,19 @@ export default function Dashboard() {
       { quantia: val, descricao: descDeposito || undefined },
       {
         onSuccess: () => {
-          setSuccessMsg(`Depósito de ${formatMoney(val)} realizado com sucesso!`);
+          setSuccessMsg(
+            `Depósito de ${formatMoney(val)} realizado com sucesso!`,
+          );
           setValorDeposito("");
           setDescDeposito("");
           refetchSaldo();
         },
         onError: (err: any) => {
-          setErrorMsg(err.response?.data?.message || "Erro ao realizar depósito.");
+          setErrorMsg(
+            err.response?.data?.message || "Erro ao realizar depósito.",
+          );
         },
-      }
+      },
     );
   };
 
@@ -138,7 +150,7 @@ export default function Dashboard() {
         onError: (err: any) => {
           setErrorMsg(err.response?.data?.message || "Erro ao realizar saque.");
         },
-      }
+      },
     );
   };
 
@@ -173,16 +185,20 @@ export default function Dashboard() {
       },
       {
         onSuccess: () => {
-          setSuccessMsg(`Transferência de ${formatMoney(val)} enviada com sucesso!`);
+          setSuccessMsg(
+            `Transferência de ${formatMoney(val)} enviada com sucesso!`,
+          );
           setValorTransf("");
           setContaTransf("");
           setDescTransf("");
           refetchSaldo();
         },
         onError: (err: any) => {
-          setErrorMsg(err.response?.data?.message || "Erro ao realizar transferência.");
+          setErrorMsg(
+            err.response?.data?.message || "Erro ao realizar transferência.",
+          );
         },
-      }
+      },
     );
   };
 
@@ -194,14 +210,16 @@ export default function Dashboard() {
           Painel Financeiro
         </h2>
         <p className="text-[var(--color-texto)]">
-          Gerencie seu saldo, realize transações bancárias em tempo real e acompanhe seu extrato.
+          Gerencie seu saldo, realize transações bancárias em tempo real e
+          acompanhe seu extrato.
         </p>
 
         {isBlocked && (
           <div className="flex items-center gap-2 rounded-lg bg-red-50 border border-red-200 p-4 text-red-800 my-2 animate-pulse">
             <AlertCircle className="h-5 w-5 flex-shrink-0" />
             <div>
-              <span className="font-semibold">Conta Bloqueada!</span> Operações financeiras e consulta de saldo suspensas até a regularização.
+              <span className="font-semibold">Conta Bloqueada!</span> Operações
+              financeiras e consulta de saldo suspensas até a regularização.
             </div>
           </div>
         )}
@@ -239,30 +257,42 @@ export default function Dashboard() {
           <CardContent className="grid gap-4 p-6">
             <div className="grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
               <div className="flex flex-col gap-1 border-r pr-2">
-                <span className="text-gray-500 font-semibold text-xs uppercase">Agência</span>
+                <span className="text-gray-500 font-semibold text-xs uppercase">
+                  Agência
+                </span>
                 <span className="text-lg font-bold text-[var(--color-verde-floresta)]">
                   {loadingConta ? "..." : conta?.agencia || "0001"}
                 </span>
               </div>
               <div className="flex flex-col gap-1 border-r pr-2">
-                <span className="text-gray-500 font-semibold text-xs uppercase">Conta</span>
+                <span className="text-gray-500 font-semibold text-xs uppercase">
+                  Conta
+                </span>
                 <span className="text-lg font-bold text-[var(--color-verde-floresta)]">
                   {loadingConta ? "..." : conta?.numero || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col gap-1 border-r pr-2">
-                <span className="text-gray-500 font-semibold text-xs uppercase">Status</span>
-                <span className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                  isBlocked
-                    ? "bg-red-100 text-red-800"
-                    : "bg-green-100 text-green-800"
-                }`}>
+                <span className="text-gray-500 font-semibold text-xs uppercase">
+                  Status
+                </span>
+                <span
+                  className={`inline-flex w-fit items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    isBlocked
+                      ? "bg-red-100 text-red-800"
+                      : "bg-green-100 text-green-800"
+                  }`}
+                >
                   {loadingConta ? "..." : conta?.status || "N/A"}
                 </span>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-gray-500 font-semibold text-xs uppercase font-rubik">LiraBank</span>
-                <span className="text-sm font-semibold text-gray-700">Digital Premium</span>
+                <span className="text-gray-500 font-semibold text-xs uppercase font-rubik">
+                  LiraBank
+                </span>
+                <span className="text-sm font-semibold text-gray-700">
+                  Digital Premium
+                </span>
               </div>
             </div>
           </CardContent>
@@ -297,7 +327,11 @@ export default function Dashboard() {
                   className="text-[var(--color-verde-floresta)] hover:bg-[var(--color-pistache)]/20"
                   onClick={() => setShowBalance(!showBalance)}
                 >
-                  {showBalance ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showBalance ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </Button>
               </div>
             )}
@@ -327,7 +361,10 @@ export default function Dashboard() {
                     ? "bg-[var(--color-verde-floresta)] text-white shadow-sm"
                     : "text-gray-600 hover:bg-gray-200"
                 }`}
-                onClick={() => { clearFeedbacks(); setActiveTab("deposito"); }}
+                onClick={() => {
+                  clearFeedbacks();
+                  setActiveTab("deposito");
+                }}
               >
                 Depósito
               </button>
@@ -338,7 +375,10 @@ export default function Dashboard() {
                     ? "bg-[var(--color-verde-floresta)] text-white shadow-sm"
                     : "text-gray-600 hover:bg-gray-200"
                 }`}
-                onClick={() => { clearFeedbacks(); setActiveTab("saque"); }}
+                onClick={() => {
+                  clearFeedbacks();
+                  setActiveTab("saque");
+                }}
               >
                 Saque
               </button>
@@ -349,7 +389,10 @@ export default function Dashboard() {
                     ? "bg-[var(--color-verde-floresta)] text-white shadow-sm"
                     : "text-gray-600 hover:bg-gray-200"
                 }`}
-                onClick={() => { clearFeedbacks(); setActiveTab("transferencia"); }}
+                onClick={() => {
+                  clearFeedbacks();
+                  setActiveTab("transferencia");
+                }}
               >
                 Transferir
               </button>
@@ -359,7 +402,10 @@ export default function Dashboard() {
             {activeTab === "deposito" && (
               <form onSubmit={handleDeposito} className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="valorDep" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="valorDep"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Valor a Depositar
                   </Label>
                   <Input
@@ -375,7 +421,10 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="descDep" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="descDep"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Descrição (Opcional)
                   </Label>
                   <Input
@@ -409,7 +458,10 @@ export default function Dashboard() {
             {activeTab === "saque" && (
               <form onSubmit={handleSaque} className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="valorSaq" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="valorSaq"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Valor a Sacar
                   </Label>
                   <Input
@@ -425,7 +477,10 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="descSaq" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="descSaq"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Descrição (Opcional)
                   </Label>
                   <Input
@@ -459,7 +514,10 @@ export default function Dashboard() {
             {activeTab === "transferencia" && (
               <form onSubmit={handleTransferencia} className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="contaTransf" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="contaTransf"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Número da Conta Destino
                   </Label>
                   <Input
@@ -473,7 +531,10 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="valorTransf" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="valorTransf"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Valor a Transferir
                   </Label>
                   <Input
@@ -489,7 +550,10 @@ export default function Dashboard() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="descTransf" className="text-[var(--color-verde-floresta)] font-medium">
+                  <Label
+                    htmlFor="descTransf"
+                    className="text-[var(--color-verde-floresta)] font-medium"
+                  >
                     Descrição/Motivo (Opcional)
                   </Label>
                   <Input
@@ -553,27 +617,37 @@ export default function Dashboard() {
                   const isTransfer = t.type === "TRANSFERENCIA";
                   const isDeposit = t.type === "DEPOSITO";
 
-                  let flowIcon = <ArrowUpRight className="h-5 w-5 text-red-600" />;
+                  let flowIcon = (
+                    <ArrowUpRight className="h-5 w-5 text-red-600" />
+                  );
                   let labelColor = "text-red-700 font-semibold";
                   let opName = "Saque";
                   let valuePrefix = "- ";
 
                   if (isDeposit) {
-                    flowIcon = <ArrowDownLeft className="h-5 w-5 text-green-600" />;
+                    flowIcon = (
+                      <ArrowDownLeft className="h-5 w-5 text-green-600" />
+                    );
                     labelColor = "text-green-700 font-semibold";
                     opName = "Depósito";
                     valuePrefix = "+ ";
                   } else if (isTransfer) {
                     if (isRecipient) {
-                      flowIcon = <ArrowDownLeft className="h-5 w-5 text-green-600" />;
+                      flowIcon = (
+                        <ArrowDownLeft className="h-5 w-5 text-green-600" />
+                      );
                       labelColor = "text-green-700 font-semibold";
-                      const fromName = t.conta?.usuario?.nome || "Outro usuário";
+                      const fromName =
+                        t.conta?.usuario?.nome || "Outro usuário";
                       opName = `Transferência Recebida (de ${fromName.split(" ")[0]})`;
                       valuePrefix = "+ ";
                     } else {
-                      flowIcon = <ArrowRightLeft className="h-5 w-5 text-red-600" />;
+                      flowIcon = (
+                        <ArrowRightLeft className="h-5 w-5 text-red-600" />
+                      );
                       labelColor = "text-red-700 font-semibold";
-                      const toName = t.contaDestino?.usuario?.nome || "Outro usuário";
+                      const toName =
+                        t.contaDestino?.usuario?.nome || "Outro usuário";
                       opName = `Transferência Enviada (para ${toName.split(" ")[0]})`;
                       valuePrefix = "- ";
                     }
@@ -605,7 +679,9 @@ export default function Dashboard() {
                           </span>
                         </div>
                       </div>
-                      <span className={`text-base font-bold text-right sm:self-center ${labelColor}`}>
+                      <span
+                        className={`text-base font-bold text-right sm:self-center ${labelColor}`}
+                      >
                         {valuePrefix}
                         {formatMoney(t.quantia)}
                       </span>

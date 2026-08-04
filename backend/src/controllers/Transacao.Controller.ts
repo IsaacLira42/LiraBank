@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { TransacaoService } from "../services/Transacao.Service";
-import { TransacaoCreateInputSchema } from "../types/transacao/Transacao.Schema";
+import {
+  TransacaoCreateInputSchema,
+  TransacaoListarQuerySchema,
+} from "../types/transacao/Transacao.Schema";
 
 export class TransacaoController {
   private transacaoService: TransacaoService;
@@ -8,6 +11,22 @@ export class TransacaoController {
   constructor(transacaoService: TransacaoService) {
     this.transacaoService = transacaoService;
   }
+
+  listarExtrato = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const usuarioId = Number(req.user?.id);
+      const query = TransacaoListarQuerySchema.parse(req.query);
+
+      const extrato = await this.transacaoService.listarExtrato(usuarioId, query);
+
+      return res.status(200).json({
+        success: true,
+        data: extrato,
+      });
+    } catch (error) {
+      next(error);
+    }
+  };
 
   listMe = async (req: Request, res: Response, next: NextFunction) => {
     try {

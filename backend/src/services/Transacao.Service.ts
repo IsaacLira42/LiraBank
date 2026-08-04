@@ -4,6 +4,11 @@ import { ContaRepository } from "../repositories/Conta.Repository";
 import { TransacaoRepository } from "../repositories/Transacao.Repository";
 import { AppError } from "../utils/AppError";
 import { TipoTransacao } from "../generated/prisma/client";
+import {
+  TransacaoExtratoDto,
+  TransacaoItemExtratoDto,
+  TransacaoListarQueryDto,
+} from "../types/transacao/Transacao.Dto";
 
 export class TransacaoService {
   private transacaoRepository: TransacaoRepository;
@@ -22,6 +27,75 @@ export class TransacaoService {
     if (!conta) throw new AppError("Conta não encontrada.", 404);
 
     return this.transacaoRepository.findByContaId(conta.id);
+  }
+
+  async listarExtrato(
+    usuarioId: number,
+    query: TransacaoListarQueryDto
+  ): Promise<TransacaoExtratoDto> {
+    const conta = await this.contaRepository.findByIdUser(usuarioId);
+    if (!conta) throw new AppError("Conta não encontrada.", 404);
+
+    const { page, limit, tipo } = query;
+
+    const dataInicio = query.dataInicio
+      ? new Date(`${query.dataInicio}T00:00:00.000Z`)
+      : undefined;
+    const dataFim = query.dataFim
+      ? new Date(`${query.dataFim}T23:59:59.999Z`)
+      : undefined;
+
+    if (dataInicio && dataFim && dataInicio > dataFim) {
+      throw new AppError("A data inicial não pode ser maior que a data final.", 400);
+    }
+
+    const { items, totalItems } =
+      await this.transacaoRepository.findByContaIdPaginado({
+        contaId: conta.id,
+        page,
+        limit,
+        tipo,
+        dataInicio,
+        dataFim,
+      });
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    return {
+      items: items.map((item) => this.toExtratoItem(item, conta.id)),
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+      },
+    };
+  }
+
+  private toExtratoItem(item: any, contaId: number): TransacaoItemExtratoDto {
+    const ehOrigem = item.contaId === contaId;
+
+    let nomeContraparte: string | null = null;
+    if (item.type === "TRANSFERENCIA") {
+      const outraConta = ehOrigem ? item.contaDestino : item.conta;
+      nomeContraparte = outraConta?.usuario?.nome ?? null;
+    }
+
+    return {
+      id: item.id,
+      tipo: item.type,
+      valor: Number(item.quantia),
+      descricao: item.descricao ?? null,
+      data: item.createdAt,
+      codigoComprovante: item.codigoComprovante,
+      contaOrigem: item.conta
+        ? { agencia: item.conta.agencia, numero: item.conta.numero }
+        : null,
+      contaDestino: item.contaDestino
+        ? { agencia: item.contaDestino.agencia, numero: item.contaDestino.numero }
+        : null,
+      nomeContraparte,
+    };
   }
 
   async createByUsuario(

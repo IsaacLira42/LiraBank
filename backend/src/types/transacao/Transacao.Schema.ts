@@ -8,5 +8,13 @@ const TransacaoCreateInputSchema = z.object({
   numeroContaDestino: z.string().optional(),
 });
 
-export { TransacaoCreateInputSchema };
+const TransacaoListarQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+  tipo: z.enum(["DEPOSITO", "SAQUE", "TRANSFERENCIA"]).optional(),
+  dataInicio: z.iso.date().optional(),
+  dataFim: z.iso.date().optional(),
+});
+
+export { TransacaoCreateInputSchema, TransacaoListarQuerySchema };
 
